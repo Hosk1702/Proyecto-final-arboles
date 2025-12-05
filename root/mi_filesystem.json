@@ -1,0 +1,30 @@
+{
+    "id": "80f1fb67",
+    "name": "root",
+    "type": "folder",
+    "content": null,
+    "children": [
+        {
+            "id": "41870f5c",
+            "name": "docs",
+            "type": "folder",
+            "content": null,
+            "children": []
+        },
+        {
+            "id": "9fa58642",
+            "name": "fotos",
+            "type": "folder",
+            "content": null,
+            "children": [
+                {
+                    "id": "4dcd2ccf",
+                    "name": "tarea.txt",
+                    "type": "file",
+                    "content": "Contenido X",
+                    "children": []
+                }
+            ]
+        }
+    ]
+}
