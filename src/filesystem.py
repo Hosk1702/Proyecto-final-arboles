@@ -2,6 +2,36 @@ import json
 import uuid
 import os
 
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.terminating_names = set() 
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insertar(self, name):
+        node = self.root
+        name_lower = name.lower()
+        for char in name_lower:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+            node.terminating_names.add(name) 
+
+    def buscar_por_prefijo(self, prefix):
+        node = self.root
+        prefix_lower = prefix.lower()
+        
+        for char in prefix_lower:
+            if char not in node.children:
+                return [] 
+            node = node.children[char]
+            
+        return sorted(list(node.terminating_names))
+
+
 class Nodo:
     def __init__(self, nombre, tipo_nodo, contenido=None, id_existente=None):
         # Si cargamos desde JSON, usamos el ID que ya tenía, si es nuevo, generamos uno.
@@ -30,10 +60,25 @@ class Nodo:
             nuevo.hijos.append(cls.from_dict(hijo_data))
         return nuevo
 
+
 class ArbolGeneral:
     def __init__(self):
         self.root = Nodo("root", "folder")
         self.papelera = [] # Lista temporal para nodos eliminados
+        self.trie = Trie()
+
+    def _indexar_trie_recursivamente(self, start_node):
+        if start_node.nombre != "root":
+            self.trie.insertar(start_node.nombre)
+            
+        for hijo in start_node.hijos:
+            self._indexar_trie_recursivamente(hijo)
+
+    def _actualizar_trie(self, operation, name_old=None, name_new=None):
+        if operation == "create":
+            self.trie.insertar(name_new)
+        elif operation == "rename":
+            self.trie.insertar(name_new)
 
     def _buscar_nodo_y_padre(self, ruta_partes):
         # Lógica auxiliar para encontrar un nodo y quién lo contiene
@@ -62,7 +107,6 @@ class ArbolGeneral:
             actual = encontrado
         return actual, padre
 
-
     def crear_nodo(self, ruta_padre, nombre, tipo, contenido=None):
         padre, _ = self._buscar_nodo_y_padre(ruta_padre.split('/'))
         if not padre:
@@ -77,6 +121,7 @@ class ArbolGeneral:
                 
         nuevo = Nodo(nombre, tipo, contenido)
         padre.hijos.append(nuevo)
+        self._actualizar_trie("create", name_new=nombre)
         return True, f"Creado: {nombre}"
 
     def renombrar_nodo(self, ruta_nodo, nuevo_nombre):
@@ -89,7 +134,9 @@ class ArbolGeneral:
             if hermano.nombre == nuevo_nombre:
                 return False, f"Error: Ya existe '{nuevo_nombre}' en este destino."
         
+        nombre_anterior = nodo.nombre
         nodo.nombre = nuevo_nombre
+        self._actualizar_trie("rename", name_old=nombre_anterior, name_new=nuevo_nombre)
         return True, f"Renombrado a {nuevo_nombre}"
 
     def eliminar_nodo(self, ruta_nodo):
@@ -102,16 +149,13 @@ class ArbolGeneral:
         return True, "Nodo eliminado y enviado a papelera."
 
     def mover_nodo(self, ruta_origen, ruta_destino):
-        """Implementación FALTANTE del Día 3."""
         nodo_mov, padre_orig = self._buscar_nodo_y_padre(ruta_origen.split('/'))
         nuevo_padre, _ = self._buscar_nodo_y_padre(ruta_destino.split('/'))
 
         if not nodo_mov or not padre_orig:
             return False, "Error: Origen no válido."
-        if not nuevo_padre:
-            return False, "Error: Destino no existe."
-        if nuevo_padre.tipo_nodo == 'file':
-            return False, "Error: No puedes mover algo dentro de un archivo."
+        if not nuevo_padre or nuevo_padre.tipo_nodo == 'file':
+            return False, "Error: Destino no existe o es un archivo."
             
         # Validar duplicados en destino
         for hijo in nuevo_padre.hijos:
@@ -122,6 +166,9 @@ class ArbolGeneral:
         padre_orig.hijos.remove(nodo_mov)
         nuevo_padre.hijos.append(nodo_mov)
         return True, f"Movido: {nodo_mov.nombre} a {ruta_destino}"
+
+    def buscar_autocompletado(self, prefix):
+        return self.trie.buscar_por_prefijo(prefix)
 
     def guardar_arbol(self, nombre_archivo="arbol.json"):
         """Guarda el estado actual en un archivo JSON físico."""
@@ -142,31 +189,60 @@ class ArbolGeneral:
                 data = json.load(f)
                 # Reconstruimos usando el método estático from_dict
                 self.root = Nodo.from_dict(data) 
+                
+                # Re-indexar Trie
+                self.trie = Trie()
+                self._indexar_trie_recursivamente(self.root)
+                
             return True, "Árbol cargado exitosamente."
         except Exception as e:
             return False, f"Error al cargar: {str(e)}"
 
 if __name__ == "__main__":
+    
     fs = ArbolGeneral()
     
-    print("--- 1. Creando estructura inicial ---")
-    fs.crear_nodo("root", "docs", "folder")
-    fs.crear_nodo("root/docs", "tarea.txt", "file", "Contenido X")
+    print("--- 1. Creando estructura inicial y probando indexación ---")
+    fs.crear_nodo("root", "documentos", "folder")
+    fs.crear_nodo("root/documentos", "Reporte_final.txt", "file", "Contenido X")
     fs.crear_nodo("root", "fotos", "folder")
+    fs.crear_nodo("root/fotos", "Foto_vacaciones.jpg", "file")
+    fs.crear_nodo("root/fotos", "Foto_carnet.jpg", "file")
     
-    print("--- 2. Probando Mover (Faltaba) ---")
-    # Movemos tarea.txt de 'docs' a 'fotos'
-    exito, msg = fs.mover_nodo("root/docs/tarea.txt", "root/fotos")
-    print(msg)
     
-    print("--- 3. Guardando en JSON (Día 4) ---")
-    fs.guardar_arbol("./root/mi_filesystem.json")
+    print("\n--- 2. Probando Búsqueda por Prefijo (Autocompletado) ---")
     
-    print("--- 4. Simulando reinicio (Cargar JSON) ---")
+    prefix_R = "R"
+    resultados_R = fs.buscar_autocompletado(prefix_R)
+    print(f"Resultados para '{prefix_R}': {resultados_R}")
+    
+    prefix_foto = "foto"
+    resultados_foto = fs.buscar_autocompletado(prefix_foto)
+    print(f"Resultados para '{prefix_foto}': {resultados_foto}")
+    
+    
+    print("\n--- 3. Prueba de Consistencia: Renombrar y Autocompletado ---")
+    fs.renombrar_nodo("root/fotos/Foto_carnet.jpg", "Foto_perfil.png")
+    
+    prefix_Foto = "Foto"
+    resultados_cambio = fs.buscar_autocompletado(prefix_Foto)
+    print(f"Resultados para '{prefix_Foto}' después de renombrar: {resultados_cambio}")
+    
+    
+    print("\n--- 4. Guardando, Recargando y Probando Indexación ---")
+    
+    # Guardamos la estructura
+    nombre_archivo = "test_mi_filesystem.json"
+    fs.guardar_arbol(nombre_archivo)
+    
+    # Simulando reinicio
     fs_nuevo = ArbolGeneral()
-    fs_nuevo.cargar_arbol("mi_filesystem.json")
-    print("Árbol recargado, hijos en 'fotos':")
-    # Verificamos si la tarea sigue ahí después de cargar
-    for h in fs_nuevo.root.hijos:
-        if h.nombre == "fotos":
-            print([n.nombre for n in h.hijos])
+    fs_nuevo.cargar_arbol(nombre_archivo)
+    
+    # Volvemos a probar el autocompletado en el árbol cargado
+    resultados_recargados = fs_nuevo.buscar_autocompletado(prefix_R)
+    print(f"Resultados para '{prefix_R}' en árbol cargado: {resultados_recargados}")
+    
+    # Limpieza
+    if os.path.exists(nombre_archivo):
+        os.remove(nombre_archivo)

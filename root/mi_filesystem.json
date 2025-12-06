@@ -1,24 +1,24 @@
 {
-    "id": "80f1fb67",
+    "id": "2e80704d",
     "name": "root",
     "type": "folder",
     "content": null,
     "children": [
         {
-            "id": "41870f5c",
+            "id": "30324228",
             "name": "docs",
             "type": "folder",
             "content": null,
             "children": []
         },
         {
-            "id": "9fa58642",
+            "id": "cd46772e",
             "name": "fotos",
             "type": "folder",
             "content": null,
             "children": [
                 {
-                    "id": "4dcd2ccf",
+                    "id": "85a6853c",
                     "name": "tarea.txt",
                     "type": "file",
                     "content": "Contenido X",
