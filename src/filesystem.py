@@ -3,6 +3,21 @@ import uuid
 import os
 import sys
 
+# --- PARTE NUEVA: LIBRERÍA PARA EL TAB ---
+# Para que la tecla TAB funcione, necesitamos importar 'readline'.
+# OJO: En Windows a veces hay que instalar 'pyreadline3' (pip install pyreadline3).
+try:
+    import readline
+except ImportError:
+    # Si falla, creamos un "falso" readline para que el programa no se rompa,
+    # aunque el TAB no funcionará hasta que instales la librería.
+    print("AVISO: Para usar autocompletado con TAB en Windows, instala: pip install pyreadline3")
+    class readline:
+        @staticmethod
+        def set_completer(f): pass
+        @staticmethod
+        def parse_and_bind(s): pass
+
 # --- PARTE 1: EL BUSCADOR INTELIGENTE (Trie) ---
 # Imagina que esto es un índice telefónico que se actualiza solo.
 # Sirve para que cuando busques "fo", te encuentre rápido "fotos", "folder", etc.
@@ -40,7 +55,7 @@ class Trie:
             node.terminating_names.remove(name)
 
     def buscar_por_prefijo(self, prefix):
-        # Esta es la función que usa el comando 'search'.
+        # Esta es la función que usa el comando 'search' y AHORA TAMBIÉN EL TAB.
         # Tú le das el inicio de una palabra y él te devuelve todas las coincidencias.
         node = self.root
         prefix_lower = prefix.lower()
@@ -328,48 +343,59 @@ class ArbolGeneral:
 # --- PARTE 4: LA CONSOLA (Donde escribes los comandos) ---
 
 def resolver_ruta_absoluta(ruta_input, ruta_actual):
-    # Esta función ayuda a entender dónde estás.
-    # Si escribes "fotos", ella sabe que te refieres a "root/docs/fotos" (si estás en docs).
+    ruta_final = ""
+    # Si escribes 'root', empezamos desde el principio
     if ruta_input == "root" or ruta_input.startswith("root/"):
-        return ruta_input  # Si ya escribiste la ruta completa, la usamos tal cual.
-    
-    # Si no, le pegamos la carpeta actual al principio.
-    if ruta_actual == "root":
-        return f"{ruta_actual}/{ruta_input}"
+        ruta_final = ruta_input
+    # Si no, sumamos donde estás + a donde vas
+    elif ruta_actual == "root":
+        ruta_final = f"{ruta_actual}/{ruta_input}"
     else:
-        return f"{ruta_actual}/{ruta_input}"
+        ruta_final = f"{ruta_actual}/{ruta_input}"
+    
+    # ¡AQUÍ ESTÁ EL TRUCO! Pasamos la escoba antes de devolver el resultado.
+    return normalizar_ruta(ruta_final)
+
+def normalizar_ruta(ruta):
+    # 1. Separamos todo por barras. Si hay '///', saldrán espacios vacíos.
+    partes = ruta.split('/')
+    # 2. Nos quedamos solo con las partes que tienen texto (filtramos los vacíos).
+    partes_limpias = [p for p in partes if p]
+    # 3. Volvemos a unir todo con una sola barra bonita.
+    return "/".join(partes_limpias)
 
 def limpiarpantalla():
+    # Limpia la pantalla dependiendo si es Windows o Linux/Mac
     if os.name == 'nt':
         os.system('cls')
     else:
         os.system('clear')
     
 def imprimir_ayuda():
-    # Esta función es tu "chivo" o acordeón. Muestra la lista de todo lo que puedes hacer
-    # para que no tengas que memorizarlo.
+    # Esta función es tu "chivo" o acordeón. Muestra la lista de todo lo que puedes hacer.
     print("\n--- Comandos que puedes usar ---")
     
     # Comandos de movimiento y visualización
-    print("  cd <carpeta>          : Entrar a una carpeta (Usa '..' para regresar o '/' para ir al inicio)")
-    print("  ls [carpeta]          : Ver qué hay adentro (si no pones nada, muestra la carpeta donde estás)")
+    print("  [TAB]                : Autocompletar nombres (¡Pruébalo!)")
+    print("  cd <carpeta>         : Entrar a una carpeta (Usa '..' para regresar o '/' para ir al inicio)")
+    print("  ls [carpeta]         : Ver qué hay adentro (si no pones nada, muestra la carpeta donde estás)")
     
     # Comandos para crear y borrar
-    print("  mkdir <nombre>        : Crear una carpeta nueva aquí mismo")
-    print("  touch <nombre> [txt]  : Crear un archivo nuevo aquí mismo (opcional: ponle texto al final)")
-    print("  mv <origen> <destino> : Mover un archivo o carpeta a otro lugar")
-    print("  rm <nombre>           : Borrar algo (tranquilo, se va a la papelera primero)")
+    print("  mkdir <nombre>       : Crear una carpeta nueva aquí mismo")
+    print("  touch <nombre> [txt] : Crear un archivo nuevo aquí mismo (opcional: ponle texto al final)")
+    print("  mv <origen> <destino>: Mover un archivo o carpeta a otro lugar")
+    print("  rm <nombre>          : Borrar algo (tranquilo, se va a la papelera primero)")
     
     # Comandos de la Papelera
-    print("  trash                 : Ver qué cosas has borrado (la basura)")
-    print("  restore <numero>      : Rescatar algo de la basura (usa el numerito que sale al poner 'trash')")
-    print("  empty                 : Vaciar la basura para siempre (cuidado, esto sí borra todo)")
+    print("  trash                : Ver qué cosas has borrado (la basura)")
+    print("  restore <numero>     : Rescatar algo de la basura (usa el numerito que sale al poner 'trash')")
+    print("  empty                : Vaciar la basura para siempre (cuidado, esto sí borra todo)")
     
     # Comandos avanzados y del sistema
-    print("  search <texto>        : Buscar archivos rapidísimo escribiendo solo el inicio del nombre")
-    print("  load                  : Cargar lo que tenías guardado antes")
-    print("  cls                   : Limpiar el historial de la pantalla")
-    print("  exit                  : Salir del programa")
+    print("  search <texto>       : Buscar archivos rapidísimo escribiendo solo el inicio del nombre")
+    print("  load                 : Cargar lo que tenías guardado antes")
+    print("  cls                  : Limpiar el historial de la pantalla")
+    print("  exit                 : Guardar y salir del programa")
 
 def main():
     fs = ArbolGeneral()
@@ -377,9 +403,25 @@ def main():
     # Variable que recuerda en qué carpeta estás parado ahora mismo.
     current_path = "root" 
 
-    print("=== SISTEMA DE ARCHIVOS ===")
+    print("=== SISTEMA DE ARCHIVOS (Con autocompletado) ===")
     exito, msg = fs.cargar_arbol()
     if exito: print(f"[INFO] {msg}")
+
+    # --- CONFIGURACIÓN DEL TAB (AUTOCOMPLETADO) ---
+    # Esta es la función que se ejecuta cada vez que presionas TAB.
+    def completador_tab(texto_escrito, estado):
+        # 1. Le preguntamos al Trie qué opciones existen que empiecen con lo que escribiste.
+        opciones = fs.buscar_autocompletado(texto_escrito)
+        # 2. Devolvemos la opción correspondiente al 'estado' (0 es la primera, 1 la segunda, etc.)
+        if estado < len(opciones):
+            return opciones[estado]
+        else:
+            return None # No hay más opciones
+
+    # "Enchufamos" esta función a la consola.
+    readline.set_completer(completador_tab)
+    readline.parse_and_bind("tab: complete")
+    # -----------------------------------------------
 
     # Bucle infinito: Pide comandos hasta que digas 'exit'.
     while True:
@@ -397,32 +439,28 @@ def main():
             break
         
         elif cmd == "cd":
-            # Comando para cambiar de carpeta (Navegar).
             if len(args) < 1:
-                print("Dime a dónde ir. Ej: cd carpeta | cd .. (atrás) | cd / (inicio)")
+                print("Dime a dónde ir. Ej: cd carpeta | cd .. | cd /")
                 continue
             
             destino = args[0]
             
-            # Opción 1: Ir al inicio (root)
-            if destino == "/" or destino == "root":
+            # CASO 1: Ir al inicio (detectamos '/', 'root', '//', '///')
+            # Si quitamos todas las barras y no queda nada, es que el usuario quería ir a root.
+            if destino == "root" or destino.replace("/", "") == "":
                 current_path = "root"
             
-            # Opción 2: Ir atrás un paso (..)
+            # CASO 2: Ir atrás (..)
             elif destino == "..":
                 if current_path == "root":
-                    print("Ya estás en el inicio, no puedes subir más.")
+                    print("Ya estás en el inicio.")
                 else:
-                    # Borramos la última parte de la ruta para subir.
                     partes = current_path.split('/')
                     current_path = "/".join(partes[:-1])
             
-            # Opción 3: Entrar a una carpeta normal
+            # CASO 3: Moverse a una carpeta normal
             else:
-                # Calculamos cuál sería la ruta completa.
                 ruta_tentativa = resolver_ruta_absoluta(destino, current_path)
-                
-                # Le preguntamos al sistema si esa carpeta existe de verdad.
                 ok, msg = fs.validar_ruta(ruta_tentativa)
                 if ok:
                     current_path = ruta_tentativa
@@ -431,11 +469,9 @@ def main():
 
         elif cmd == "ls":
             # Listar archivos.
-            # Si no escribes nada, muestra lo que hay donde estás parado.
             if len(args) == 0:
                 target = current_path
             else:
-                # Si escribes una ruta, muestra lo que hay allá.
                 target = resolver_ruta_absoluta(args[0], current_path)
             
             ok, res = fs.listar_directorio(target)
@@ -446,7 +482,6 @@ def main():
             if not args: print("Faltó el nombre. Uso: mkdir <nombre>")
             else:
                 nombre_nuevo = args[0]
-                # La crea justo donde estás parado.
                 ok, msg = fs.crear_nodo(current_path, nombre_nuevo, "folder")
                 print(msg)
 
@@ -460,10 +495,9 @@ def main():
                 print(msg)
 
         elif cmd == "mv":
-             # Mover archivo. Aquí sí necesitas escribir las rutas completas o relativas.
+             # Mover archivo.
             if len(args) < 2: print("Faltan datos. Uso: mv <origen> <destino>")
             else:
-                # Resolvemos las rutas por si usas nombres cortos.
                 origen = resolver_ruta_absoluta(args[0], current_path)
                 destino = resolver_ruta_absoluta(args[1], current_path)
                 ok, msg = fs.mover_nodo(origen, destino)
@@ -487,13 +521,13 @@ def main():
             else: print("Escribe qué buscar.")
         elif cmd == "load": 
             print(fs.cargar_arbol()[1])
-            current_path = "root" # Al cargar de nuevo, te regresamos al inicio por seguridad.
+            current_path = "root" 
         elif cmd == "cls":
             limpiarpantalla()
         elif cmd == "help":
             imprimir_ayuda()
         else:
-            print("No entiendo ese comando.")                                     
+            print("No entiendo ese comando.")                                    
 
 if __name__ == "__main__":
     main()
