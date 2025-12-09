@@ -1,30 +1,53 @@
 {
-    "id": "2e80704d",
-    "name": "root",
-    "type": "folder",
-    "content": null,
-    "children": [
+    "filesystem": {
+        "id": "2e80704d",
+        "name": "root",
+        "type": "folder",
+        "content": null,
+        "children": [
+            {
+                "id": "cd46772e",
+                "name": "fotos",
+                "type": "folder",
+                "content": null,
+                "children": [
+                    {
+                        "id": "85a6853c",
+                        "name": "tarea.txt",
+                        "type": "file",
+                        "content": "Contenido X",
+                        "children": []
+                    }
+                ]
+            }
+        ]
+    },
+    "trash": [
         {
-            "id": "30324228",
-            "name": "docs",
-            "type": "folder",
-            "content": null,
-            "children": []
-        },
-        {
-            "id": "cd46772e",
-            "name": "fotos",
-            "type": "folder",
-            "content": null,
-            "children": [
-                {
-                    "id": "85a6853c",
-                    "name": "tarea.txt",
-                    "type": "file",
-                    "content": "Contenido X",
-                    "children": []
-                }
-            ]
+            "path_origen": "root/docs",
+            "path_padre": "root",
+            "nodo": {
+                "id": "30324228",
+                "name": "docs",
+                "type": "folder",
+                "content": null,
+                "children": [
+                    {
+                        "id": "6ed528a8",
+                        "name": "pokemon",
+                        "type": "folder",
+                        "content": null,
+                        "children": []
+                    },
+                    {
+                        "id": "e7030a7e",
+                        "name": "info",
+                        "type": "file",
+                        "content": "hola me llamo marco",
+                        "children": []
+                    }
+                ]
+            }
         }
     ]
 }
