@@ -19,8 +19,14 @@
                         "children": []
                     }
                 ]
-            },
-            {
+            }
+        ]
+    },
+    "trash": [
+        {
+            "path_origen": "root/docs",
+            "path_padre": "root",
+            "nodo": {
                 "id": "30324228",
                 "name": "docs",
                 "type": "folder",
@@ -42,7 +48,6 @@
                     }
                 ]
             }
-        ]
-    },
-    "trash": []
+        }
+    ]
 }
