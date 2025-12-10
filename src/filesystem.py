@@ -134,10 +134,10 @@ class ArbolGeneral:
         # Esta función es como un GPS. Le das una dirección (ej. "root/fotos/playa")
         # y te devuelve el objeto "playa" y su carpeta contenedora "fotos".
         if isinstance(ruta_partes, str):
-            ruta_partes = ruta_partes.split('/')
+            # Usamos la nueva normalización robusta aquí
+            ruta_partes = normalizar_ruta(ruta_partes).split('/')
             
-        # Limpieza: quitamos partes vacías por si pusiste barras dobles (//).
-        ruta_partes = [p for p in ruta_partes if p]
+        # Nota: La normalización ya se encarga de la limpieza de barras.
 
         if not ruta_partes or (len(ruta_partes) == 1 and ruta_partes[0] == "root"):
             return self.root, None
@@ -195,6 +195,7 @@ class ArbolGeneral:
     def mover_nodo(self, ruta_origen, ruta_destino):
         # Mueve cosas de un lugar a otro.
         nodo_mov, padre_orig = self._buscar_nodo_y_padre(ruta_origen)
+        # Importante: buscar el destino de forma normalizada para el padre
         nuevo_padre, _ = self._buscar_nodo_y_padre(ruta_destino)
 
         if not nodo_mov or not padre_orig: return False, "No encuentro lo que quieres mover."
@@ -357,12 +358,30 @@ def resolver_ruta_absoluta(ruta_input, ruta_actual):
     return normalizar_ruta(ruta_final)
 
 def normalizar_ruta(ruta):
-    # 1. Separamos todo por barras. Si hay '///', saldrán espacios vacíos.
+    # 1. Separamos todo por barras.
     partes = ruta.split('/')
-    # 2. Nos quedamos solo con las partes que tienen texto (filtramos los vacíos).
-    partes_limpias = [p for p in partes if p]
-    # 3. Volvemos a unir todo con una sola barra bonita.
-    return "/".join(partes_limpias)
+    
+    # 2. Usamos una pila para resolver ".." (parent directory)
+    partes_resueltas = []
+    for p in partes:
+        # Ignora barras extra (''), el directorio actual ('.'), y la primera 'root'
+        if p == '' or p == '.':
+            continue
+        elif p == '..':
+            # Si encontramos '..', subimos un nivel (quitamos el último elemento)
+            # Solo si no estamos ya en la raíz ('root')
+            if partes_resueltas and partes_resueltas[-1] != "root":
+                partes_resueltas.pop()
+        else:
+            partes_resueltas.append(p)
+    
+    # Aseguramos que la primera parte sea 'root'
+    if not partes_resueltas or partes_resueltas[0] != "root":
+        # Si la ruta fue solo '..', debe volver a 'root'
+        return "root"
+    
+    # 3. Volvemos a unir todo con una sola barra.
+    return "/".join(partes_resueltas)
 
 def limpiarpantalla():
     # Limpia la pantalla dependiendo si es Windows o Linux/Mac
@@ -446,17 +465,16 @@ def main():
             destino = args[0]
             
             # CASO 1: Ir al inicio (detectamos '/', 'root', '//', '///')
-            # Si quitamos todas las barras y no queda nada, es que el usuario quería ir a root.
-            if destino == "root" or destino.replace("/", "") == "":
+            if destino.lower() == "root" or normalizar_ruta(destino) == "root":
                 current_path = "root"
             
-            # CASO 2: Ir atrás (..)
+            # CASO 2: Ir atrás (..) se maneja ahora con la normalización
             elif destino == "..":
                 if current_path == "root":
                     print("Ya estás en el inicio.")
                 else:
-                    partes = current_path.split('/')
-                    current_path = "/".join(partes[:-1])
+                    ruta_tentativa = resolver_ruta_absoluta("..", current_path)
+                    current_path = ruta_tentativa
             
             # CASO 3: Moverse a una carpeta normal
             else:
@@ -510,6 +528,16 @@ def main():
                 target = resolver_ruta_absoluta(args[0], current_path)
                 ok, msg = fs.eliminar_nodo(target)
                 print(msg)
+                
+        # Comando para renombrar (no estaba en el código original, pero es necesario)
+        elif cmd == "ren" or cmd == "rename":
+            if len(args) < 2: print("Faltan datos. Uso: ren <nombre_viejo> <nombre_nuevo>")
+            else:
+                ruta_nodo = resolver_ruta_absoluta(args[0], current_path)
+                nuevo_nombre = args[1]
+                ok, msg = fs.renombrar_nodo(ruta_nodo, nuevo_nombre)
+                print(msg)
+
 
         elif cmd == "trash": print(fs.ver_papelera())
         elif cmd == "restore":
