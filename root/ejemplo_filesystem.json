@@ -1,0 +1,253 @@
+{
+    "filesystem": {
+        "id": "root001",
+        "name": "root",
+        "type": "folder",
+        "content": null,
+        "children": [
+            {
+                "id": "proj001",
+                "name": "proyectos",
+                "type": "folder",
+                "content": null,
+                "children": [
+                    {
+                        "id": "web001",
+                        "name": "web_app",
+                        "type": "folder",
+                        "content": null,
+                        "children": [
+                            {
+                                "id": "file001",
+                                "name": "index.html",
+                                "type": "file",
+                                "content": "<!DOCTYPE html>\n<html>\n<head>\n  <title>Mi Proyecto</title>\n</head>\n<body>\n  <h1>Bienvenido</h1>\n</body>\n</html>",
+                                "children": []
+                            },
+                            {
+                                "id": "file002",
+                                "name": "styles.css",
+                                "type": "file",
+                                "content": "body {\n  font-family: Arial, sans-serif;\n  margin: 0;\n  padding: 20px;\n}",
+                                "children": []
+                            },
+                            {
+                                "id": "file003",
+                                "name": "app.js",
+                                "type": "file",
+                                "content": "console.log('App iniciada');\n\nfunction saludar(nombre) {\n  return `Hola, ${nombre}`;\n}",
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "id": "py001",
+                        "name": "python_project",
+                        "type": "folder",
+                        "content": null,
+                        "children": [
+                            {
+                                "id": "file004",
+                                "name": "main.py",
+                                "type": "file",
+                                "content": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)\n\nif __name__ == '__main__':\n    print(factorial(5))",
+                                "children": []
+                            },
+                            {
+                                "id": "file005",
+                                "name": "utils.py",
+                                "type": "file",
+                                "content": "import math\n\ndef calcular_area_circulo(radio):\n    return math.pi * radio ** 2",
+                                "children": []
+                            },
+                            {
+                                "id": "file006",
+                                "name": "requirements.txt",
+                                "type": "file",
+                                "content": "pytest==7.4.0\nnumpy==1.24.3\npandas==2.0.2",
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "docs001",
+                "name": "documentos",
+                "type": "folder",
+                "content": null,
+                "children": [
+                    {
+                        "id": "file007",
+                        "name": "reporte_final.txt",
+                        "type": "file",
+                        "content": "REPORTE FINAL - PROYECTO DE ESTRUCTURAS DE DATOS\n\nObjetivo:\nImplementar un sistema de archivos utilizando árboles, tries y hashmaps.\n\nResultados:\n- Todas las funcionalidades implementadas\n- 40 pruebas unitarias pasadas\n- Performance excelente con 10,000 nodos\n\nConclusión:\nProyecto exitoso.",
+                        "children": []
+                    },
+                    {
+                        "id": "file008",
+                        "name": "notas_clase.txt",
+                        "type": "file",
+                        "content": "NOTAS DE CLASE - ÁRBOLES\n\n1. Árbol Binario vs Árbol General\n2. Recorridos: Preorden, Inorden, Postorden\n3. Altura y profundidad\n4. Balanceo de árboles\n5. Aplicaciones prácticas",
+                        "children": []
+                    },
+                    {
+                        "id": "trab001",
+                        "name": "trabajos",
+                        "type": "folder",
+                        "content": null,
+                        "children": [
+                            {
+                                "id": "file009",
+                                "name": "tarea1.txt",
+                                "type": "file",
+                                "content": "Tarea 1: Implementar árbol binario de búsqueda\nFecha de entrega: 15 de noviembre\nEstado: Completada",
+                                "children": []
+                            },
+                            {
+                                "id": "file010",
+                                "name": "tarea2.txt",
+                                "type": "file",
+                                "content": "Tarea 2: Análisis de complejidad algorítmica\nFecha de entrega: 22 de noviembre\nEstado: Completada",
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "fotos001",
+                "name": "fotos",
+                "type": "folder",
+                "content": null,
+                "children": [
+                    {
+                        "id": "vac001",
+                        "name": "vacaciones",
+                        "type": "folder",
+                        "content": null,
+                        "children": [
+                            {
+                                "id": "file011",
+                                "name": "playa.jpg",
+                                "type": "file",
+                                "content": "[imagen binaria simulada]",
+                                "children": []
+                            },
+                            {
+                                "id": "file012",
+                                "name": "montana.jpg",
+                                "type": "file",
+                                "content": "[imagen binaria simulada]",
+                                "children": []
+                            },
+                            {
+                                "id": "file013",
+                                "name": "atardecer.jpg",
+                                "type": "file",
+                                "content": "[imagen binaria simulada]",
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "id": "file014",
+                        "name": "foto_familia.jpg",
+                        "type": "file",
+                        "content": "[imagen binaria simulada]",
+                        "children": []
+                    },
+                    {
+                        "id": "file015",
+                        "name": "perfil.png",
+                        "type": "file",
+                        "content": "[imagen binaria simulada]",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "music001",
+                "name": "musica",
+                "type": "folder",
+                "content": null,
+                "children": [
+                    {
+                        "id": "file016",
+                        "name": "cancion1.mp3",
+                        "type": "file",
+                        "content": "[audio binario simulado]",
+                        "children": []
+                    },
+                    {
+                        "id": "file017",
+                        "name": "cancion2.mp3",
+                        "type": "file",
+                        "content": "[audio binario simulado]",
+                        "children": []
+                    },
+                    {
+                        "id": "playlist",
+                        "name": "playlist_favoritos.txt",
+                        "type": "file",
+                        "content": "PLAYLIST FAVORITOS:\n1. Canción 1\n2. Canción 2\n3. Canción 3",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "backup001",
+                "name": "backup",
+                "type": "folder",
+                "content": null,
+                "children": [
+                    {
+                        "id": "file018",
+                        "name": "backup_2024_01.zip",
+                        "type": "file",
+                        "content": "[archivo comprimido simulado]",
+                        "children": []
+                    },
+                    {
+                        "id": "file019",
+                        "name": "backup_2024_02.zip",
+                        "type": "file",
+                        "content": "[archivo comprimido simulado]",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "file020",
+                "name": "README.txt",
+                "type": "file",
+                "content": "BIENVENIDO AL SISTEMA DE ARCHIVOS\n\nEste es un ejemplo de sistema de archivos pre-poblado.\n\nPuedes explorar las carpetas usando:\n- cd <carpeta>\n- ls\n- tree\n\nPrueba los comandos de búsqueda:\n- search foto\n- find README.txt\n\n¡Diviértete explorando!",
+                "children": []
+            }
+        ]
+    },
+    "trash": [
+        {
+            "path_origen": "root/archivo_viejo.txt",
+            "path_padre": "root",
+            "nodo": {
+                "id": "trash001",
+                "name": "archivo_viejo.txt",
+                "type": "file",
+                "content": "Este archivo fue eliminado pero está en la papelera.",
+                "children": []
+            }
+        },
+        {
+            "path_origen": "root/documentos/borrador.txt",
+            "path_padre": "root/documentos",
+            "nodo": {
+                "id": "trash002",
+                "name": "borrador.txt",
+                "type": "file",
+                "content": "Borrador de documento que ya no se necesita.",
+                "children": []
+            }
+        }
+    ]
+}

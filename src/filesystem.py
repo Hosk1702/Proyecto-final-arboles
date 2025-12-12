@@ -14,6 +14,78 @@ except ImportError:
         @staticmethod
         def parse_and_bind(s): pass
 
+# --- PARTE 4: LA CONSOLA ---
+
+def resolver_ruta_absoluta(ruta_input, ruta_actual):
+    if ruta_input == "root" or ruta_input.startswith("root/"):
+        ruta_final = ruta_input
+    elif ruta_actual == "root":
+        ruta_final = f"{ruta_actual}/{ruta_input}"
+    else:
+        ruta_final = f"{ruta_actual}/{ruta_input}"
+    
+    return normalizar_ruta(ruta_final)
+
+def normalizar_ruta(ruta):
+    partes = ruta.split('/')
+    partes_resueltas = []
+    
+    for p in partes:
+        if p == '' or p == '.':
+            continue
+        elif p == '..':
+            if partes_resueltas and partes_resueltas[-1] != "root":
+                partes_resueltas.pop()
+        else:
+            partes_resueltas.append(p)
+    
+    if not partes_resueltas or partes_resueltas[0] != "root":
+        return "root"
+    
+    return "/".join(partes_resueltas)
+
+def limpiarpantalla():
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        os.system('clear')
+    
+def imprimir_ayuda():
+    print("\n=== COMANDOS DISPONIBLES ===")
+    print("\n📁 Navegación y Visualización:")
+    print("  cd <carpeta>         : Cambiar de directorio")
+    print("  ls [carpeta]         : Listar contenido")
+    print("  [TAB]                : Autocompletar nombres")
+    
+    print("\n📝 Creación y Gestión:")
+    print("  mkdir <nombre>       : Crear carpeta")
+    print("  touch <nombre> [txt] : Crear archivo")
+    print("  mv <origen> <dest>   : Mover archivo/carpeta")
+    print("  ren <viejo> <nuevo>  : Renombrar")
+    print("  rm <nombre>          : Eliminar (a papelera)")
+    
+    print("\n🗑️  Papelera:")
+    print("  trash                : Ver papelera")
+    print("  restore <índice>     : Restaurar elemento")
+    print("  empty                : Vaciar papelera")
+    
+    print("\n🔍 Búsqueda:")
+    print("  search <prefijo>     : Búsqueda por prefijo (Trie)")
+    print("  find <nombre>        : Búsqueda exacta (HashMap)")
+    
+    print("\n📊 Información y Análisis:")
+    print("  info                 : Ver estadísticas del árbol")
+    print("  tree                 : Mostrar árbol en consola")
+    print("  export               : Exportar recorrido preorden")
+    
+    print("\n⚙️  Sistema:")
+    print("  save                 : Guardar manualmente")
+    print("  load                 : Cargar desde archivo")
+    print("  perf_test [cant]     : Prueba de rendimiento")
+    print("  cls                  : Limpiar pantalla")
+    print("  help                 : Mostrar esta ayuda")
+    print("  exit                 : Guardar y salir")
+
 # --- PARTE 1: EL BUSCADOR INTELIGENTE (Trie) ---
 class TrieNode:
     def __init__(self):
@@ -400,77 +472,7 @@ class ArbolGeneral:
         except Exception as e: return False, str(e)
 
 
-# --- PARTE 4: LA CONSOLA ---
 
-def resolver_ruta_absoluta(ruta_input, ruta_actual):
-    if ruta_input == "root" or ruta_input.startswith("root/"):
-        ruta_final = ruta_input
-    elif ruta_actual == "root":
-        ruta_final = f"{ruta_actual}/{ruta_input}"
-    else:
-        ruta_final = f"{ruta_actual}/{ruta_input}"
-    
-    return normalizar_ruta(ruta_final)
-
-def normalizar_ruta(ruta):
-    partes = ruta.split('/')
-    partes_resueltas = []
-    
-    for p in partes:
-        if p == '' or p == '.':
-            continue
-        elif p == '..':
-            if partes_resueltas and partes_resueltas[-1] != "root":
-                partes_resueltas.pop()
-        else:
-            partes_resueltas.append(p)
-    
-    if not partes_resueltas or partes_resueltas[0] != "root":
-        return "root"
-    
-    return "/".join(partes_resueltas)
-
-def limpiarpantalla():
-    if os.name == 'nt':
-        os.system('cls')
-    else:
-        os.system('clear')
-    
-def imprimir_ayuda():
-    print("\n=== COMANDOS DISPONIBLES ===")
-    print("\n📁 Navegación y Visualización:")
-    print("  cd <carpeta>         : Cambiar de directorio")
-    print("  ls [carpeta]         : Listar contenido")
-    print("  [TAB]                : Autocompletar nombres")
-    
-    print("\n📝 Creación y Gestión:")
-    print("  mkdir <nombre>       : Crear carpeta")
-    print("  touch <nombre> [txt] : Crear archivo")
-    print("  mv <origen> <dest>   : Mover archivo/carpeta")
-    print("  ren <viejo> <nuevo>  : Renombrar")
-    print("  rm <nombre>          : Eliminar (a papelera)")
-    
-    print("\n🗑️  Papelera:")
-    print("  trash                : Ver papelera")
-    print("  restore <índice>     : Restaurar elemento")
-    print("  empty                : Vaciar papelera")
-    
-    print("\n🔍 Búsqueda:")
-    print("  search <prefijo>     : Búsqueda por prefijo (Trie)")
-    print("  find <nombre>        : Búsqueda exacta (HashMap)")
-    
-    print("\n📊 Información y Análisis:")
-    print("  info                 : Ver estadísticas del árbol")
-    print("  tree                 : Mostrar árbol en consola")
-    print("  export               : Exportar recorrido preorden")
-    
-    print("\n⚙️  Sistema:")
-    print("  save                 : Guardar manualmente")
-    print("  load                 : Cargar desde archivo")
-    print("  perf_test [cant]     : Prueba de rendimiento")
-    print("  cls                  : Limpiar pantalla")
-    print("  help                 : Mostrar esta ayuda")
-    print("  exit                 : Guardar y salir")
 
 def main():
     fs = ArbolGeneral()

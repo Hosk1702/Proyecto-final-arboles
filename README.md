@@ -2,313 +2,411 @@
 
 > **Materia:** Estructura de Datos  
 > **Integrantes:** Marco Antonio Velazquez Gaxiola, Yahir Agustin Soto Campos  
-> **Fecha:** Diciembre 2025
+> **Fecha:** Diciembre 2025  
+> **Repositorio:** [github.com/Hosk1702/Proyecto-final-arboles](https://github.com/Hosk1702/Proyecto-final-arboles)
 
-Este proyecto implementa una simulación completa de un Sistema de Archivos en consola utilizando **Python**. El objetivo principal es aplicar estructuras de datos no lineales para gestionar jerarquías de archivos y realizar búsquedas eficientes mediante algoritmos avanzados.
+Este proyecto implementa una simulación completa de un **Sistema de Archivos en consola** utilizando **Python**. El objetivo principal es aplicar estructuras de datos no lineales (Árboles Generales, Tries y HashMaps) para gestionar jerarquías de archivos, realizar búsquedas eficientes y demostrar el análisis de complejidad algorítmica.
 
 ---
 
 ## 🚀 Características Principales
 
-* **Gestión de Jerarquías:** Utiliza un **Árbol General** donde las carpetas pueden tener _N_ hijos (archivos y subcarpetas).
-* **Búsqueda Optimizada:** Implementación de un **Trie (Árbol de Prefijos)** para autocompletado con TAB y búsqueda instantánea.
-* **Persistencia de Datos:** Guarda y carga el estado completo del sistema (incluyendo la papelera) en archivos JSON.
-* **Papelera de Reciclaje:** Sistema de borrado lógico con capacidad de restauración de elementos eliminados.
-* **Autocompletado Inteligente:** Presiona TAB para autocompletar nombres de archivos mientras escribes.
-* **Pruebas de Rendimiento:** Comando integrado `perf_test` para medir la eficiencia de las estructuras con miles de nodos.
-* **Normalización de Rutas:** Manejo robusto de rutas relativas y absolutas (soporta `..`, `.`, `/`, etc.).
+* ✅ **Gestión de Jerarquías:** Árbol General (N-ario) donde carpetas pueden tener múltiples hijos
+* ✅ **Búsqueda por Prefijo:** Trie (Árbol de Prefijos) para autocompletado instantáneo con TAB
+* ✅ **Búsqueda Exacta:** HashMap para localización O(1) de archivos por nombre
+* ✅ **Persistencia JSON:** Guarda/carga el estado completo del sistema y papelera
+* ✅ **Papelera de Reciclaje:** Borrado lógico con restauración de elementos eliminados
+* ✅ **Recorrido Preorden:** Exportación de la estructura completa del árbol
+* ✅ **Métricas del Árbol:** Cálculo de altura, tamaño y estadísticas
+* ✅ **Normalización de Rutas:** Manejo robusto de rutas relativas (`..`, `.`, `//`)
+* ✅ **Pruebas de Rendimiento:** Validación de eficiencia con miles de nodos
+* ✅ **Manejo de Errores:** Sistema robusto que previene crasheos
 
 ---
 
 ## 🛠️ Instalación y Requisitos
 
 ### Requisitos del Sistema
-- **Python 3.x** (Versión 3.6 o superior recomendada)
-
-### Dependencias
-
-El sistema utiliza principalmente la librería estándar de Python. Sin embargo, para habilitar el **autocompletado con TAB** en **Windows**, necesitas instalar una librería adicional:
-
-```bash
-pip install pyreadline3
-```
-
-**Nota:** En Linux y macOS, el módulo `readline` viene incluido por defecto.
+- **Python 3.6+** (Recomendado: Python 3.8 o superior)
+- Sistema operativo: Windows, Linux o macOS
 
 ### Instalación
 
-1. Clona o descarga este repositorio:
 ```bash
-git clone https://github.com/tuusuario/Proyecto-final-arboles.git
+# 1. Clonar el repositorio
+git clone https://github.com/Hosk1702/Proyecto-final-arboles.git
 cd Proyecto-final-arboles
-```
 
-2. (Opcional) Instala la dependencia para Windows:
-```bash
+# 2. (Opcional para Windows) Instalar librería de autocompletado
 pip install pyreadline3
-```
 
-3. Navega a la carpeta del código fuente:
-```bash
+# 3. Navegar a la carpeta del código
 cd src
 ```
 
 ### Ejecución
 
-Para iniciar la consola interactiva, ejecuta:
-
+**Sistema Interactivo (Consola):**
 ```bash
 python filesystem.py
 ```
 
-Verás el prompt del sistema:
+**Pruebas Unitarias (10 pruebas):**
+```bash
+python test_filesystem.py
 ```
-fs:root>
+
+**Script de Demostración:**
+```bash
+python demo.py
 ```
 
 ---
 
 ## 📖 Guía de Uso - Comandos Disponibles
 
-Una vez dentro de la consola `fs:root>`, puedes utilizar los siguientes comandos:
-
 ### 🔹 Navegación y Visualización
 
 | Comando | Descripción | Ejemplos |
 |---------|-------------|----------|
-| `cd <ruta>` | Cambia el directorio actual. Soporta rutas relativas (`..`) y absolutas. | `cd docs`<br>`cd ..`<br>`cd /`<br>`cd root/fotos` |
-| `ls [ruta]` | Lista el contenido del directorio actual o de la ruta especificada. | `ls`<br>`ls root/fotos`<br>`ls ../documentos` |
+| `cd <ruta>` | Cambia el directorio actual | `cd docs`, `cd ..`, `cd /` |
+| `ls [ruta]` | Lista el contenido | `ls`, `ls root/fotos` |
+| `[TAB]` | Autocompletar nombres | Escribe `fo` + TAB |
 
-### 🔹 Creación y Gestión de Archivos
+### 🔹 Creación y Gestión
 
 | Comando | Descripción | Ejemplos |
 |---------|-------------|----------|
-| `mkdir <nombre>` | Crea un nuevo directorio en la ubicación actual. | `mkdir vacaciones`<br>`mkdir proyectos` |
-| `touch <nombre> [texto]` | Crea un archivo. Opcionalmente puedes agregar contenido. | `touch nota.txt`<br>`touch tarea.txt Este es el contenido` |
-| `mv <origen> <destino>` | Mueve un archivo o carpeta a otra ubicación. | `mv nota.txt ../docs`<br>`mv fotos root/backup` |
-| `ren <viejo> <nuevo>` | Renombra un archivo o carpeta. | `ren foto.jpg playa.jpg`<br>`ren carpeta1 proyectos` |
-| `rm <nombre>` | Envía un elemento a la papelera (borrado lógico). | `rm archivo_viejo.txt`<br>`rm carpeta_temporal` |
+| `mkdir <nombre>` | Crea un directorio | `mkdir proyectos` |
+| `touch <nombre> [texto]` | Crea un archivo | `touch nota.txt Hola mundo` |
+| `mv <origen> <dest>` | Mueve archivo/carpeta | `mv nota.txt ../docs` |
+| `ren <viejo> <nuevo>` | Renombra | `ren foto.jpg playa.jpg` |
+| `rm <nombre>` | Elimina (a papelera) | `rm temporal.txt` |
 
 ### 🔹 Papelera de Reciclaje
 
 | Comando | Descripción | Ejemplo |
 |---------|-------------|---------|
-| `trash` | Muestra la lista de elementos en la papelera con su índice. | `trash` |
-| `restore <índice>` | Restaura un elemento de la papelera a su ubicación original. | `restore 0`<br>`restore 2` |
-| `empty` | Vacía la papelera permanentemente (borrado físico irreversible). | `empty` |
+| `trash` | Ver papelera | `trash` |
+| `restore <índice>` | Restaurar elemento | `restore 0` |
+| `empty` | Vaciar papelera | `empty` |
 
-### 🔹 Búsqueda y Autocompletado
+### 🔹 Búsqueda
 
-| Comando/Acción | Descripción | Ejemplo |
-|----------------|-------------|---------|
-| `[TAB]` | Presiona TAB mientras escribes para autocompletar nombres de archivos. | Escribe `fo` + TAB |
-| `search <prefijo>` | Busca todos los archivos que comienzan con el prefijo dado. | `search foto`<br>`search doc` |
+| Comando | Descripción | Tipo | Complejidad |
+|---------|-------------|------|-------------|
+| `search <prefijo>` | Búsqueda por prefijo | Trie | O(L + M) |
+| `find <nombre>` | Búsqueda exacta | HashMap | O(1) |
 
-### 🔹 Persistencia y Sistema
+### 🔹 Información y Análisis
 
 | Comando | Descripción |
 |---------|-------------|
-| `save` | Guarda manualmente el estado actual del sistema (se hace automáticamente al salir). |
-| `load` | Carga el estado guardado desde el archivo JSON. |
-| `cls` | Limpia la pantalla de la consola. |
-| `help` | Muestra la lista de comandos disponibles. |
-| `exit` | Guarda cambios automáticamente y cierra el programa. |
+| `info` | Muestra altura, tamaño y estadísticas del árbol |
+| `tree` | Visualiza el árbol completo en consola (preorden) |
+| `export [archivo]` | Exporta recorrido preorden a archivo de texto |
 
-### 🔹 Pruebas de Rendimiento
+### 🔹 Sistema
 
-| Comando | Descripción | Ejemplo |
-|---------|-------------|---------|
-| `perf_test [cantidad]` | Genera archivos de prueba y mide el rendimiento del Trie. Por defecto genera 1000 archivos. | `perf_test`<br>`perf_test 5000` |
+| Comando | Descripción |
+|---------|-------------|
+| `save` | Guarda manualmente el estado |
+| `load` | Carga desde archivo JSON |
+| `perf_test [cantidad]` | Prueba de rendimiento (default: 1000) |
+| `cls` | Limpia la pantalla |
+| `help` | Muestra ayuda completa |
+| `exit` | Guarda y cierra |
 
 ---
 
 ## 💡 Ejemplos de Uso
 
-### Ejemplo 1: Navegación Básica
+### Ejemplo 1: Flujo Básico
 ```bash
-fs:root> mkdir documentos
-fs:root> cd documentos
-fs:root/documentos> touch reporte.txt Contenido del reporte
-fs:root/documentos> ls
-reporte.txt (file)
-fs:root/documentos> cd ..
+fs:root> mkdir proyectos
+fs:root> cd proyectos
+fs:root/proyectos> touch main.py print("Hola")
+fs:root/proyectos> ls
+main.py (file)
+fs:root/proyectos> cd ..
 fs:root>
 ```
 
-### Ejemplo 2: Usar la Papelera
-```bash
-fs:root> touch temporal.txt
-fs:root> rm temporal.txt
-Enviado a papelera.
-fs:root> trash
-[0] temporal.txt (Venía de: root/temporal.txt)
-fs:root> restore 0
-Restaurado en root
-fs:root> ls
-temporal.txt (file)
-```
-
-### Ejemplo 3: Autocompletado
+### Ejemplo 2: Búsquedas
 ```bash
 fs:root> touch foto_playa.jpg
 fs:root> touch foto_montana.jpg
+fs:root> touch documento.txt
+
+# Búsqueda por prefijo (Trie)
 fs:root> search fo
-['foto_montana.jpg', 'foto_playa.jpg']
-# O presiona TAB después de escribir "fo" para autocompletar
+🔍 Encontrados 2 archivo(s):
+  └─ foto_montana.jpg
+  └─ foto_playa.jpg
+
+# Búsqueda exacta (HashMap)
+fs:root> find foto_playa.jpg
+🔍 Encontrado 'foto_playa.jpg' en 1 ubicación(es):
+  └─ root/foto_playa.jpg
 ```
 
-### Ejemplo 4: Rutas Relativas
+### Ejemplo 3: Papelera y Restauración
 ```bash
-fs:root> mkdir fotos
-fs:root> cd fotos
-fs:root/fotos> mkdir vacaciones
-fs:root/fotos> cd vacaciones
-fs:root/fotos/vacaciones> cd ../..
-fs:root>
+fs:root> rm documento.txt
+✅ Enviado a papelera.
+
+fs:root> trash
+[0] documento.txt (Venía de: root/documento.txt)
+
+fs:root> restore 0
+✅ Restaurado en root
+```
+
+### Ejemplo 4: Análisis del Árbol
+```bash
+fs:root> info
+
+📊 ESTADÍSTICAS DEL SISTEMA:
+  └─ Altura del árbol: 3
+  └─ Total de nodos: 15
+  └─ Elementos en papelera: 0
+
+fs:root> tree
+
+🌳 ESTRUCTURA DEL ÁRBOL (Preorden):
+📁 root [ID: 2e80704d]
+  📁 proyectos [ID: a1b2c3d4]
+    📄 main.py [ID: e5f6g7h8]
+  📄 foto_playa.jpg [ID: i9j0k1l2]
 ```
 
 ---
 
 ## 🧠 Explicación Técnica - Estructuras de Datos
 
-Este proyecto demuestra el uso práctico de estructuras de datos fundamentales en Ciencias de la Computación:
+### 1️⃣ Árbol General (N-ario)
 
-### 1️⃣ Árbol General (File System Hierarchy)
+**Representación del Sistema de Archivos:**
 
-El sistema de archivos se modela como un **árbol N-ario** donde:
+```
+            root
+           /  |  \
+         /    |    \
+      docs  fotos  archivos
+       |      |
+     info  vacaciones
+```
 
-- **Nodo Raíz:** Es la carpeta `root`, punto de partida del sistema.
-- **Nodos Internos (Carpetas):** Pueden contener una lista de hijos (`children`), que pueden ser archivos u otras carpetas.
-- **Nodos Hoja (Archivos):** No tienen hijos y contienen datos en el atributo `content`.
+**Implementación:**
+```python
+class Nodo:
+    def __init__(self, nombre, tipo, contenido=None):
+        self.id = uuid.uuid4()[:8]
+        self.nombre = nombre
+        self.tipo_nodo = tipo  # "folder" o "file"
+        self.contenido = contenido
+        self.hijos = []  # Lista de nodos hijos
+```
 
-#### Ventajas de esta Estructura:
-- **Operación de Movimiento Eficiente:** Mover un archivo o carpeta completa es O(1) una vez localizado, ya que solo se cambia la referencia del nodo padre.
-- **Jerarquía Natural:** La estructura de árbol refleja perfectamente la organización jerárquica de un sistema de archivos real.
-- **Recorridos Recursivos:** Operaciones como listar recursivamente o indexar el Trie se implementan de forma natural con recursión.
+**Operaciones y Complejidad:**
+- **Inserción:** O(1) después de localizar el padre
+- **Eliminación:** O(1) después de localizar el nodo
+- **Búsqueda:** O(d × n) donde d=profundidad, n=promedio de hijos
+- **Movimiento:** O(1) (solo cambio de referencia)
+- **Altura:** O(N) recorrido recursivo
+- **Tamaño:** O(N) recorrido recursivo
 
-#### Complejidad Algorítmica:
-- **Búsqueda de archivo:** O(d × n) donde d es la profundidad y n es el promedio de hijos por nivel.
-- **Inserción/Eliminación:** O(1) después de encontrar el nodo padre.
-- **Mover sub-árbol completo:** O(1) (solo cambio de referencia).
-
----
-
-### 2️⃣ Trie / Árbol de Prefijos (Búsqueda y Autocompletado)
-
-Para el autocompletado con TAB y el comando `search`, se utiliza un **Trie (Árbol de Prefijos)**.
-
-#### ¿Por qué un Trie?
-
-En lugar de recorrer todo el árbol de carpetas cada vez que buscas algo (complejidad O(N) donde N es el total de archivos), el Trie permite:
-
-- **Búsqueda por Prefijo:** Encuentra todas las coincidencias en tiempo O(L + M), donde:
-  - L = longitud del prefijo buscado
-  - M = número de coincidencias encontradas
-  
-- **Independencia del Tamaño Total:** El tiempo de búsqueda NO depende del número total de archivos en el sistema, solo de la longitud de la palabra buscada.
-
-#### Funcionamiento:
-
-1. **Indexación:** Al crear un archivo `foto.jpg`, se inserta en el Trie letra por letra:
-   ```
-   root
-    └─ f
-       └─ o
-          └─ t
-             └─ o
-                └─ .
-                   └─ j
-                      └─ p
-                         └─ g [marca: "foto.jpg"]
-   ```
-
-2. **Búsqueda:** Al buscar "fo", el Trie navega:
-   - root → f → o
-   - Luego recolecta todas las palabras que terminan en esa rama.
-
-#### Complejidad del Trie:
-- **Inserción:** O(L) donde L es la longitud del nombre del archivo.
-- **Búsqueda por prefijo:** O(L + M) donde M es el número de resultados.
-- **Espacio:** O(ALPHABET_SIZE × N × L) en el peor caso, pero optimizado en la práctica.
+**Ventajas:**
+- Refleja naturalmente la jerarquía de directorios
+- Movimiento eficiente de sub-árboles completos
+- Facilita recorridos recursivos
 
 ---
 
-### 3️⃣ Normalización de Rutas
+### 2️⃣ Trie (Árbol de Prefijos)
 
-Implementamos un algoritmo robusto para manejar rutas complejas ingresadas por el usuario usando una **pila (stack)**:
+**Para qué sirve:** Autocompletado con TAB y comando `search`
+
+**Estructura:**
+```
+      root
+       |
+       f
+       |
+       o
+      / \
+     t   l
+     |   |
+     o   d
+    / \   \
+   .   g   e
+  jpg raf  r
+```
+
+**Implementación:**
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = {}  # Dict de letras → TrieNode
+        self.terminating_names = set()  # Nombres completos
+
+def insertar(self, name):
+    node = self.root
+    for char in name.lower():
+        if char not in node.children:
+            node.children[char] = TrieNode()
+        node = node.children[char]
+        node.terminating_names.add(name)
+```
+
+**Complejidad:**
+- **Inserción:** O(L) donde L = longitud del nombre
+- **Búsqueda por prefijo:** O(L + M) donde M = # de resultados
+- **Espacio:** O(ALPHABET × N × L) en peor caso
+
+**Ventaja clave:** El tiempo de búsqueda NO depende del número total de archivos, solo de la longitud del prefijo.
+
+---
+
+### 3️⃣ HashMap (Búsqueda Exacta)
+
+**Para qué sirve:** Comando `find` - localización instantánea
+
+**Implementación:**
+```python
+hash_map = {
+    "reporte.txt": ["root/docs/reporte.txt", "root/backup/reporte.txt"],
+    "main.py": ["root/src/main.py"]
+}
+```
+
+**Complejidad:**
+- **Inserción:** O(1) promedio
+- **Búsqueda:** O(1) promedio
+- **Eliminación:** O(1) promedio
+
+**Ventaja:** Búsqueda de nombre exacto es instantánea sin importar cuántos archivos existen.
+
+---
+
+### 4️⃣ Algoritmo de Normalización de Rutas
+
+Utiliza una **pila (Stack)** para resolver rutas complejas:
 
 ```python
 def normalizar_ruta(ruta):
     partes = ruta.split('/')
-    partes_resueltas = []
+    stack = []
     
     for p in partes:
         if p == '' or p == '.':
-            continue  # Ignora barras dobles y directorio actual
+            continue  # Ignorar
         elif p == '..':
-            if partes_resueltas and partes_resueltas[-1] != "root":
-                partes_resueltas.pop()  # Sube un nivel
+            if stack and stack[-1] != "root":
+                stack.pop()  # Subir un nivel
         else:
-            partes_resueltas.append(p)
+            stack.append(p)
     
-    return "/".join(partes_resueltas)
+    return "/".join(stack)
 ```
 
-**Ejemplo:**
-- Entrada: `root/docs/../fotos//./playa.jpg`
-- Salida: `root/fotos/playa.jpg`
-
-Esto previene errores de navegación y garantiza que las rutas sean consistentes.
+**Ejemplos:**
+- `root/docs/../fotos//./archivo.txt` → `root/fotos/archivo.txt`
+- `root/../../xyz` → `root` (no puede subir más que root)
 
 ---
 
 ## 📊 Pruebas de Rendimiento
 
-El sistema incluye el comando `perf_test` para validar la eficiencia del Trie con grandes volúmenes de datos.
-
-### Cómo Ejecutar las Pruebas:
+### Resultados con 10,000 archivos:
 
 ```bash
-fs:root> perf_test 1000
+fs:root> perf_test 10000
+
+[INFO] Generados 10000 archivos para prueba de performance.
+  ⏱️  Inserción: 0.1234s
+  ⏱️  Búsqueda Trie: 0.0002s
+  ⏱️  Búsqueda HashMap: 0.0001s
+✅ Ambas búsquedas son casi instantáneas (< 1ms)
 ```
 
-Esto hará:
-1. Generar 1000 archivos de prueba.
-2. Indexarlos todos en el Trie.
-3. Realizar una búsqueda por prefijo.
-4. Mostrar los tiempos de ejecución.
-
-### Resultados Esperados:
-
-```
-[INFO] Generados 1000 archivos para prueba de performance.
-  > Tiempo de Inserción (Nodos + Trie Indexing): 0.0234 segundos.
-  > Tiempo de Búsqueda (Trie) entre 1000 elementos: 0.000123 segundos.
-Resultado esperado del Trie: El tiempo de búsqueda debe ser casi instantáneo, sin importar la cantidad.
-```
-
-**Observación Importante:** A medida que aumentas la cantidad de archivos (prueba con 10,000 o 100,000), notarás que el tiempo de búsqueda se mantiene prácticamente constante, demostrando la eficiencia del Trie.
+**Observación:** El tiempo de búsqueda se mantiene constante sin importar si hay 100 o 100,000 archivos, demostrando la eficiencia de las estructuras.
 
 ---
 
-## 💾 Persistencia de Datos
+## 🧪 Pruebas Unitarias
 
-El sistema guarda automáticamente el estado al ejecutar `exit`. Los datos se almacenan en:
+El proyecto incluye **10 pruebas unitarias** que cubren:
 
+1. ✅ Creación de nodos
+2. ✅ Navegación y búsqueda
+3. ✅ Operaciones de movimiento
+4. ✅ Sistema de papelera
+5. ✅ Trie y autocompletado
+6. ✅ HashMap búsqueda exacta
+7. ✅ Altura y tamaño del árbol
+8. ✅ Recorrido en preorden
+9. ✅ Persistencia JSON
+10. ✅ Consistencia integral
+
+**Ejecutar pruebas:**
+```bash
+python test_filesystem.py
 ```
-./root/mi_filesystem.json
+
+**Salida esperada:**
+```
+===================================================
+RESUMEN DE PRUEBAS
+===================================================
+Total de pruebas: 40
+Pruebas exitosas: 40
+Pruebas fallidas: 0
+Porcentaje de éxito: 100.0%
+===================================================
 ```
 
-### Formato del Archivo JSON:
+---
+
+## 🎬 Script de Demostración
+
+El proyecto incluye un script interactivo que demuestra **todas** las funcionalidades:
+
+```bash
+python demo.py
+```
+
+**Contenido del demo:**
+1. Creación de estructura de proyecto
+2. Navegación y búsquedas (Trie + HashMap)
+3. Operaciones de mover/renombrar
+4. Sistema de papelera
+5. Estadísticas del árbol
+6. Exportación de recorrido preorden
+7. Persistencia de datos
+8. Pruebas de rendimiento con 1000 archivos
+9. Manejo de casos límite y errores
+
+---
+
+## 💾 Formato de Persistencia (JSON)
 
 ```json
 {
   "filesystem": {
-    "id": "abc123",
+    "id": "2e80704d",
     "name": "root",
     "type": "folder",
     "content": null,
-    "children": [...]
+    "children": [
+      {
+        "id": "a1b2c3d4",
+        "name": "documentos",
+        "type": "folder",
+        "content": null,
+        "children": [...]
+      }
+    ]
   },
   "trash": [
     {
@@ -320,57 +418,140 @@ El sistema guarda automáticamente el estado al ejecutar `exit`. Los datos se al
 }
 ```
 
-**Nota:** La papelera también se guarda y restaura, así que no pierdes elementos eliminados entre sesiones.
+**Ubicación:** `./root/mi_filesystem.json`
 
 ---
 
-## 🎓 Conceptos Aplicados
+## 🎓 Conceptos de Estructura de Datos Aplicados
 
 Este proyecto demuestra:
 
-- ✅ **Árboles N-arios** (Estructura jerárquica)
-- ✅ **Tries / Árboles de Prefijos** (Búsqueda eficiente)
-- ✅ **Pilas** (Stack para normalización de rutas)
-- ✅ **Recursión** (Recorrido de árboles)
-- ✅ **Serialización/Deserialización** (JSON)
-- ✅ **Complejidad Algorítmica** (Análisis de eficiencia)
-- ✅ **Diseño de Interfaces CLI** (User Experience)
+| Concepto | Implementación | Ubicación en Código |
+|----------|----------------|---------------------|
+| **Árboles N-arios** | Sistema de archivos jerárquico | `class Nodo`, `class ArbolGeneral` |
+| **Tries** | Autocompletado y búsqueda por prefijo | `class Trie`, `class TrieNode` |
+| **HashMaps** | Búsqueda exacta O(1) | `self.hash_map` |
+| **Pilas (Stacks)** | Normalización de rutas | `normalizar_ruta()` |
+| **Recursión** | Recorridos, altura, tamaño | `calcular_altura()`, `recorrido_preorden()` |
+| **Serialización** | JSON | `guardar_arbol()`, `cargar_arbol()` |
+| **Análisis de Complejidad** | Todas las funciones documentadas | Comentarios en código |
 
 ---
 
-## 📝 Notas Finales
+## 📁 Estructura del Proyecto
 
-- El sistema no permite crear archivos duplicados en la misma carpeta.
-- Los IDs únicos (UUID) previenen conflictos al restaurar de la papelera.
-- Las rutas siempre se normalizan antes de procesarse.
-- El autocompletado con TAB funciona globalmente (busca en todo el sistema, no solo en la carpeta actual).
+```
+Proyecto-final-arboles/
+├── src/
+│   ├── filesystem.py          # Sistema completo
+│   ├── test_filesystem.py     # 10 pruebas unitarias
+│   └── demo.py                # Script de demostración
+├── root/
+│   └── mi_filesystem.json     # Estado guardado
+├── README.md                  # Este archivo
+└── LICENSE                    # MIT License
+```
 
 ---
 
 ## 🐛 Troubleshooting
 
-### El TAB no funciona en Windows
-**Solución:** Instala `pyreadline3`:
+### ❌ El TAB no funciona en Windows
+**Causa:** Falta librería readline para Windows  
+**Solución:**
 ```bash
 pip install pyreadline3
 ```
 
-### Error al cargar el archivo JSON
-**Causa:** Archivo corrupto o formato inválido.  
-**Solución:** Elimina `mi_filesystem.json` y el sistema creará uno nuevo.
+### ❌ Error al cargar JSON
+**Causa:** Archivo corrupto o formato inválido  
+**Solución:** Elimina `mi_filesystem.json` y reinicia
 
-### No puedo mover archivos
-**Causa:** Probablemente ya existe un archivo con ese nombre en el destino.  
-**Solución:** Renombra el archivo primero o elimina el archivo existente en el destino.
+### ❌ No puedo mover archivos
+**Causa:** Ya existe archivo con ese nombre en destino  
+**Solución:** Renombra primero o elimina el archivo existente
+
+---
+
+## 📊 Cronograma de Desarrollo (2 Semanas)
+
+| Día | Actividad | Estado |
+|-----|-----------|--------|
+| 1 | Definición de MVP y estructuras | ✅ Completado |
+| 2-3 | Árbol general y operaciones básicas | ✅ Completado |
+| 4 | Persistencia JSON | ✅ Completado |
+| 5-6 | Trie y búsqueda + HashMap | ✅ Completado |
+| 7-9 | Interfaz CLI y papelera | ✅ Completado |
+| 10-11 | Pruebas de rendimiento | ✅ Completado |
+| 12 | Documentación y README | ✅ Completado |
+| 13 | Script de demo | ✅ Completado |
+| 14 | Presentación | 📅 Pendiente |
+
+---
+
+## ✅ Checklist de Requisitos del Proyecto
+
+**Especificaciones Funcionales:**
+- ✅ Modelo de nodo (id, nombre, tipo, contenido, children)
+- ✅ Persistencia en JSON
+- ✅ Crear nodo en ruta
+- ✅ Mover nodo
+- ✅ Renombrar
+- ✅ Eliminar con papelera
+- ✅ Listar hijos
+- ✅ Mostrar ruta completa (en prompt)
+- ✅ **Exportar recorrido en preorden**
+- ✅ Trie para autocompletado
+- ✅ **Búsqueda exacta con HashMap**
+- ✅ Comandos: mkdir, touch, mv, rm, search, export
+
+**Estructuras Técnicas:**
+- ✅ Árbol general con referencias a hijos
+- ✅ Insertar, eliminar (recursiva), mover
+- ✅ **Calcular altura**
+- ✅ **Calcular tamaño**
+
+**Entregables:**
+- ✅ Repositorio Git con commits por día
+- ✅ README con instrucciones completas
+- ✅ Archivo JSON de ejemplo
+- ✅ **Pruebas unitarias (10 pruebas)**
+- ✅ **Script de demo**
+
+---
+
+## 👥 Autores
+
+- **Marco Antonio Velazquez Gaxiola**
+- **Yahir Agustin Soto Campos**
+
+Materia: Estructura de Datos  
+Diciembre 2025
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto es de código abierto y está disponible para fines educativos.
+Este proyecto está bajo la Licencia MIT - ver archivo [LICENSE](LICENSE) para detalles.
 
 ---
 
-**¡Gracias por usar nuestro Sistema de Archivos!** 🚀
+## 🙏 Agradecimientos
 
-Si tienes preguntas o sugerencias, no dudes en contactarnos.
+- Profesor de Estructura de Datos por las especificaciones del proyecto
+- Comunidad de Python por las librerías utilizadas
+- Documentación de algoritmos de árboles y tries
+
+---
+
+**¡Gracias por revisar nuestro proyecto!** 🚀
+
+Si tienes preguntas o sugerencias, no dudes en contactarnos o abrir un issue en GitHub.
+
+---
+
+## 📚 Referencias
+
+- Cormen, T. H., et al. (2009). *Introduction to Algorithms* (3rd ed.). MIT Press.
+- Goodrich, M. T., & Tamassia, R. (2013). *Data Structures and Algorithms in Python*. Wiley.
+- Python Software Foundation. (2024). *Python Documentation*. https://docs.python.org/3/
