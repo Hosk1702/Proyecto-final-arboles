@@ -134,10 +134,12 @@ class ArbolGeneral:
         # Esta función es como un GPS. Le das una dirección (ej. "root/fotos/playa")
         # y te devuelve el objeto "playa" y su carpeta contenedora "fotos".
         if isinstance(ruta_partes, str):
-            ruta_partes = ruta_partes.split('/')
+            # Usamos la nueva normalización robusta aquí
+            ruta_partes = normalizar_ruta(ruta_partes).split('/')
             
-        # Limpieza: quitamos partes vacías por si pusiste barras dobles (//).
+        # Nota: La normalización ya se encarga de la limpieza de barras.
         ruta_partes = [p for p in ruta_partes if p]
+
 
         if not ruta_partes or (len(ruta_partes) == 1 and ruta_partes[0] == "root"):
             return self.root, None
@@ -176,6 +178,19 @@ class ArbolGeneral:
 
     # --- ACCIONES PRINCIPALES (Los comandos que usarás) ---
 
+    def generar_carga_prueba(self, cantidad):
+        """Genera una gran cantidad de archivos para pruebas de rendimiento (Día 10-11)."""
+        padre = self.root
+        for i in range(cantidad):
+            # Crea nombres únicos para que el Trie no tenga colisiones perfectas
+            nombre = f"archivo_perf_{i:05d}_test.txt" 
+            nuevo = Nodo(nombre, "file", f"Contenido del archivo de prueba {i}")
+            padre.hijos.append(nuevo)
+            # Indexamos en el Trie inmediatamente
+            self._actualizar_trie("create", name_new=nombre)
+        return True, f"Generados {cantidad} archivos para prueba de performance."
+
+
     def crear_nodo(self, ruta_padre, nombre, tipo, contenido=None):
         # Crea carpetas o archivos nuevos.
         padre, _ = self._buscar_nodo_y_padre(ruta_padre)
@@ -195,6 +210,7 @@ class ArbolGeneral:
     def mover_nodo(self, ruta_origen, ruta_destino):
         # Mueve cosas de un lugar a otro.
         nodo_mov, padre_orig = self._buscar_nodo_y_padre(ruta_origen)
+        # Importante: buscar el destino de forma normalizada para el padre
         nuevo_padre, _ = self._buscar_nodo_y_padre(ruta_destino)
 
         if not nodo_mov or not padre_orig: return False, "No encuentro lo que quieres mover."
@@ -309,6 +325,9 @@ class ArbolGeneral:
             # Juntamos árbol y papelera en un solo paquete.
             data = {"filesystem": self.root.to_dict(), "trash": papelera_serializada}
             
+            # Aseguramos que la carpeta exista si no está (asumiendo que 'root' está en el mismo nivel)
+            os.makedirs(os.path.dirname(nombre_archivo), exist_ok=True) 
+            
             with open(nombre_archivo, 'w') as f: json.dump(data, f, indent=4)
             return True, f"Guardado correctamente en {nombre_archivo}"
         except Exception as e: return False, str(e)
@@ -357,12 +376,30 @@ def resolver_ruta_absoluta(ruta_input, ruta_actual):
     return normalizar_ruta(ruta_final)
 
 def normalizar_ruta(ruta):
-    # 1. Separamos todo por barras. Si hay '///', saldrán espacios vacíos.
+    # 1. Separamos todo por barras.
     partes = ruta.split('/')
-    # 2. Nos quedamos solo con las partes que tienen texto (filtramos los vacíos).
-    partes_limpias = [p for p in partes if p]
-    # 3. Volvemos a unir todo con una sola barra bonita.
-    return "/".join(partes_limpias)
+    
+    # 2. Usamos una pila para resolver ".." (parent directory)
+    partes_resueltas = []
+    for p in partes:
+        # Ignora barras extra (''), el directorio actual ('.')
+        if p == '' or p == '.':
+            continue
+        elif p == '..':
+            # Si encontramos '..', subimos un nivel (quitamos el último elemento)
+            # Solo si no estamos ya en la raíz ('root')
+            if partes_resueltas and partes_resueltas[-1] != "root":
+                partes_resueltas.pop()
+        else:
+            partes_resueltas.append(p)
+    
+    # Aseguramos que la primera parte sea 'root'
+    if not partes_resueltas or partes_resueltas[0] != "root":
+        # Si la ruta fue solo '..', debe volver a 'root'
+        return "root"
+    
+    # 3. Volvemos a unir todo con una sola barra.
+    return "/".join(partes_resueltas)
 
 def limpiarpantalla():
     # Limpia la pantalla dependiendo si es Windows o Linux/Mac
@@ -393,6 +430,7 @@ def imprimir_ayuda():
     
     # Comandos avanzados y del sistema
     print("  search <texto>       : Buscar archivos rapidísimo escribiendo solo el inicio del nombre")
+    print("  perf_test [cant]     : (Día 10-11) Generar y medir rendimiento del Trie (defecto: 1000)")
     print("  load                 : Cargar lo que tenías guardado antes")
     print("  cls                  : Limpiar el historial de la pantalla")
     print("  exit                 : Guardar y salir del programa")
@@ -445,20 +483,11 @@ def main():
             
             destino = args[0]
             
-            # CASO 1: Ir al inicio (detectamos '/', 'root', '//', '///')
-            # Si quitamos todas las barras y no queda nada, es que el usuario quería ir a root.
-            if destino == "root" or destino.replace("/", "") == "":
+            # CASO 1: Ir al inicio (detectamos '/', 'root')
+            if destino.lower() == "root" or destino == "/":
                 current_path = "root"
             
-            # CASO 2: Ir atrás (..)
-            elif destino == "..":
-                if current_path == "root":
-                    print("Ya estás en el inicio.")
-                else:
-                    partes = current_path.split('/')
-                    current_path = "/".join(partes[:-1])
-            
-            # CASO 3: Moverse a una carpeta normal
+            # CASO 2: Moverse a una carpeta normal o usando rutas relativas
             else:
                 ruta_tentativa = resolver_ruta_absoluta(destino, current_path)
                 ok, msg = fs.validar_ruta(ruta_tentativa)
@@ -500,8 +529,12 @@ def main():
             else:
                 origen = resolver_ruta_absoluta(args[0], current_path)
                 destino = resolver_ruta_absoluta(args[1], current_path)
-                ok, msg = fs.mover_nodo(origen, destino)
-                print(msg)
+                # Modificación para permitir renombrar al mover
+                if origen.split('/')[-1] != destino.split('/')[-1] and fs._buscar_nodo_y_padre(destino)[0] and fs._buscar_nodo_y_padre(destino)[0].tipo_nodo == 'file':
+                    print("Error: No se puede mover y renombrar un archivo sobre un archivo existente.")
+                else:
+                    ok, msg = fs.mover_nodo(origen, destino)
+                    print(msg)
 
         elif cmd == "rm":
             # Eliminar (a papelera).
@@ -510,6 +543,43 @@ def main():
                 target = resolver_ruta_absoluta(args[0], current_path)
                 ok, msg = fs.eliminar_nodo(target)
                 print(msg)
+
+        elif cmd == "ren" or cmd == "rename":
+            if len(args) < 2: print("Faltan datos. Uso: ren <nombre_viejo> <nombre_nuevo>")
+            else:
+                ruta_nodo = resolver_ruta_absoluta(args[0], current_path)
+                nuevo_nombre = args[1]
+                ok, msg = fs.renombrar_nodo(ruta_nodo, nuevo_nombre)
+                print(msg)
+                
+        elif cmd == "perf_test":
+            # Comando de prueba de performance (Día 10-11)
+            import time
+            
+            if not args:
+                cantidad = 1000
+            else:
+                try:
+                    cantidad = int(args[0])
+                except ValueError:
+                    print("Uso: perf_test [cantidad_nodos]")
+                    continue
+
+            # Prueba de Inserción (Creación de Nodos y Trie Indexing)
+            start_time = time.time()
+            ok, msg = fs.generar_carga_prueba(cantidad)
+            end_time = time.time()
+            print(f"[INFO] {msg}")
+            print(f"  > Tiempo de Inserción (Nodos + Trie Indexing): {end_time - start_time:.4f} segundos.")
+            
+            # Prueba de Búsqueda (Trie performance)
+            # Buscamos un prefijo que coincida con una parte grande de los nombres
+            start_time = time.time()
+            fs.buscar_autocompletado("archivo_perf_9") 
+            end_time = time.time()
+            print(f"  > Tiempo de Búsqueda (Trie) entre {cantidad} elementos: {end_time - start_time:.6f} segundos.")
+            
+            print("Resultado esperado del Trie: El tiempo de búsqueda debe ser casi instantáneo, sin importar la cantidad.")
 
         elif cmd == "trash": print(fs.ver_papelera())
         elif cmd == "restore":
