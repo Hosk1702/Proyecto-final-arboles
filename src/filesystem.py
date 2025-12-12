@@ -597,7 +597,7 @@ def main():
         elif cmd == "help":
             imprimir_ayuda()
         else:
-            print("No entiendo ese comando.")                                    
+            print("No entiendo ese comando")                                    
 
 if __name__ == "__main__":
     main()
