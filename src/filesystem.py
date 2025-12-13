@@ -106,14 +106,16 @@ class Trie:
             node.terminating_names.add(name) 
     
     def eliminar(self, name):
+        # --- MODIFICACIÓN REALIZADA AQUÍ ---
         node = self.root
         name_lower = name.lower()
         for char in name_lower:
             if char not in node.children:
                 return
             node = node.children[char]
-        if name in node.terminating_names:
-            node.terminating_names.remove(name)
+            # Borramos el nombre de TODOS los nodos del camino, no solo del último.
+            if name in node.terminating_names:
+                node.terminating_names.remove(name)
 
     def buscar_por_prefijo(self, prefix):
         node = self.root
